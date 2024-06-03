@@ -21,7 +21,7 @@ StaticPopupDialogs["PLAYER_LINK_URL"] = {
     hasEditBox = true
 }
 
-local AtlasforgeURL = "https://atlasforge.gg/wow-classic/armory/"
+local ClassicArmoryURL = "https://classic-armory.org/character/"
 local WarcraftLogsURL = "https://vanilla.warcraftlogs.com/character/"
 local ServerRegions = {'us', 'kr', 'eu', 'tw', 'cn'}
 
@@ -31,7 +31,7 @@ local function generateLink(self, prefix, value)
 
     if self.value == value then
         local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
-        local PlayerURL = prefix .. CurrentRegion .. '/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
+        local PlayerURL = prefix .. CurrentRegion .. '/vanilla/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
         local PopupDataFill = {PlayerURL = PlayerURL}
 
         StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
@@ -56,6 +56,6 @@ hooksecurefunc("UnitPopup_ShowMenu", function()
         return
     end
 
-    addMenuItem("Atlasforge Armory", AtlasforgeURL, "AtlasforgeLink")
+    addMenuItem("Classic Armory", ClassicArmoryURL, "ClassicArmoryLink")
     addMenuItem("Warcraft Logs", WarcraftLogsURL, "WarcraftlogsLink")
 end)
