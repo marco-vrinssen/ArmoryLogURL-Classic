@@ -25,26 +25,31 @@ local ClassicArmoryURL = "https://classic-armory.org/character/"
 local WarcraftLogsURL = "https://vanilla.warcraftlogs.com/character/"
 local ServerRegions = {'us', 'kr', 'eu', 'tw', 'cn'}
 
-local function generateLink(self, prefix, value)
+local function generateClassicArmoryLink(self)
     local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
     local CurrentRegion = ServerRegions[GetCurrentRegion()]
-
-    if self.value == value then
-        local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
-        local PlayerURL = prefix .. CurrentRegion .. '/vanilla/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
-        local PopupDataFill = {PlayerURL = PlayerURL}
-
-        StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
-    end
+    local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
+    local PlayerURL = ClassicArmoryURL .. CurrentRegion .. '/vanilla/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
+    local PopupDataFill = {PlayerURL = PlayerURL}
+    StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
 end
 
-local function addMenuItem(text, PlayerURL, value)
+local function generateWarcraftLogsLink(self)
+    local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
+    local CurrentRegion = ServerRegions[GetCurrentRegion()]
+    local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
+    local PlayerURL = WarcraftLogsURL .. CurrentRegion .. '/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
+    local PopupDataFill = {PlayerURL = PlayerURL}
+    StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
+end
+
+local function addMenuItem(text, func, value)
     local MenuItem = UIDropDownMenu_CreateInfo()
 
     MenuItem.text = text
     MenuItem.owner = which
     MenuItem.notCheckable = 1
-    MenuItem.func = function(self) generateLink(self, PlayerURL, value) end
+    MenuItem.func = func
     MenuItem.colorCode = "|cffFFD100"
     MenuItem.value = value
 
@@ -56,6 +61,6 @@ hooksecurefunc("UnitPopup_ShowMenu", function()
         return
     end
 
-    addMenuItem("Classic Armory", ClassicArmoryURL, "ClassicArmoryLink")
-    addMenuItem("Warcraft Logs", WarcraftLogsURL, "WarcraftlogsLink")
+    addMenuItem("Classic Armory", generateClassicArmoryLink, "ClassicArmoryLink")
+    addMenuItem("Warcraft Logs", generateWarcraftLogsLink, "WarcraftlogsLink")
 end)
