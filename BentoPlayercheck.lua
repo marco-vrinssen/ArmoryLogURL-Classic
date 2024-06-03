@@ -56,6 +56,6 @@ hooksecurefunc("UnitPopup_ShowMenu", function()
         return
     end
 
-    addMenuItem("Armory", AtlasforgeURL, "AtlasforgeLink")
-    addMenuItem("Logs", WarcraftLogsURL, "WarcraftlogsLink")
+    addMenuItem("Atlasforge Armory", AtlasforgeURL, "AtlasforgeLink")
+    addMenuItem("Warcraft Logs", WarcraftLogsURL, "WarcraftlogsLink")
 end)
