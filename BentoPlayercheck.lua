@@ -23,6 +23,7 @@ StaticPopupDialogs["PLAYER_LINK_URL"] = {
 
 local ClassicArmoryURL = "https://classic-armory.org/character/"
 local WarcraftLogsURL = "https://vanilla.warcraftlogs.com/character/"
+local AOTCArmoryURL = "https://sod.aotc.gg/character/"
 local ServerRegions = {'us', 'kr', 'eu', 'tw', 'cn'}
 
 local function generateClassicArmoryLink(self)
@@ -39,6 +40,15 @@ local function generateWarcraftLogsLink(self)
     local CurrentRegion = ServerRegions[GetCurrentRegion()]
     local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
     local PlayerURL = WarcraftLogsURL .. CurrentRegion .. '/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
+    local PopupDataFill = {PlayerURL = PlayerURL}
+    StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
+end
+
+local function generateAOTCArmoryLink(self)
+    local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
+    local CurrentRegion = ServerRegions[GetCurrentRegion()]
+    local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
+    local PlayerURL = AOTCArmoryURL .. CurrentRegion .. '/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
     local PopupDataFill = {PlayerURL = PlayerURL}
     StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
 end
@@ -61,6 +71,7 @@ hooksecurefunc("UnitPopup_ShowMenu", function()
         return
     end
 
+    addMenuItem("AOTC Armory", generateAOTCArmoryLink, "AOTCArmoryLink")
     addMenuItem("Classic Armory", generateClassicArmoryLink, "ClassicArmoryLink")
     addMenuItem("Warcraft Logs", generateWarcraftLogsLink, "WarcraftlogsLink")
 end)
