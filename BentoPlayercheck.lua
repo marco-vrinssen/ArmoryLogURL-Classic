@@ -70,7 +70,6 @@ hooksecurefunc("UnitPopup_ShowMenu", function()
     if (UIDROPDOWNMENU_MENU_LEVEL > 1) then
         return
     end
-
     addMenuItem("AOTC Armory", generateAOTCArmoryLink, "AOTCArmoryLink")
     addMenuItem("Classic Armory", generateClassicArmoryLink, "ClassicArmoryLink")
     addMenuItem("Warcraft Logs", generateWarcraftLogsLink, "WarcraftlogsLink")
