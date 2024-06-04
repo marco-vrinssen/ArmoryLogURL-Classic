@@ -26,7 +26,7 @@ local WarcraftLogsURL = "https://vanilla.warcraftlogs.com/character/"
 local AOTCArmoryURL = "https://sod.aotc.gg/character/"
 local ServerRegions = {'us', 'kr', 'eu', 'tw', 'cn'}
 
-local function generateClassicArmoryLink(self)
+local function ClassicArmoryLink(self)
     local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
     local CurrentRegion = ServerRegions[GetCurrentRegion()]
     local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
@@ -35,7 +35,7 @@ local function generateClassicArmoryLink(self)
     StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
 end
 
-local function generateWarcraftLogsLink(self)
+local function WarcraftLogsLink(self)
     local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
     local CurrentRegion = ServerRegions[GetCurrentRegion()]
     local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
@@ -44,7 +44,7 @@ local function generateWarcraftLogsLink(self)
     StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
 end
 
-local function generateAOTCArmoryLink(self)
+local function AOTCLink(self)
     local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
     local CurrentRegion = ServerRegions[GetCurrentRegion()]
     local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
@@ -53,7 +53,7 @@ local function generateAOTCArmoryLink(self)
     StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
 end
 
-local function addMenuItem(text, func, value)
+local function MenuItemAdd(text, func, value)
     local MenuItem = UIDropDownMenu_CreateInfo()
 
     MenuItem.text = text
@@ -70,7 +70,7 @@ hooksecurefunc("UnitPopup_ShowMenu", function()
     if (UIDROPDOWNMENU_MENU_LEVEL > 1) then
         return
     end
-    addMenuItem("AOTC Armory", generateAOTCArmoryLink, "AOTCArmoryLink")
-    addMenuItem("Classic Armory", generateClassicArmoryLink, "ClassicArmoryLink")
-    addMenuItem("Warcraft Logs", generateWarcraftLogsLink, "WarcraftlogsLink")
+    MenuItemAdd("AOTC Armory", AOTCLink, "AOTCArmoryLink")
+    MenuItemAdd("Classic Armory", ClassicArmoryLink, "ClassicArmoryLink")
+    MenuItemAdd("Warcraft Logs", WarcraftLogsLink, "WarcraftlogsLink")
 end)
