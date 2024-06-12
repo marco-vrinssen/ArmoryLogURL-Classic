@@ -21,9 +21,10 @@ StaticPopupDialogs["PLAYER_LINK_URL"] = {
     hasEditBox = true
 }
 
-local ClassicArmoryURL = "https://classic-armory.org/character/"
 local WarcraftLogsURL = "https://vanilla.warcraftlogs.com/character/"
+local ClassicArmoryURL = "https://classic-armory.org/character/"
 local AOTCArmoryURL = "https://sod.aotc.gg/character/"
+local AtlasforgeArmoryURL = "https://atlasforge.gg/wow-classic/armory/"
 local ServerRegions = {'us', 'kr', 'eu', 'tw', 'cn'}
 
 local function ClassicArmoryLink(self)
@@ -53,6 +54,15 @@ local function AOTCLink(self)
     StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
 end
 
+local function AtlasforgeLink(self)
+    local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
+    local CurrentRegion = ServerRegions[GetCurrentRegion()]
+    local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
+    local PlayerURL = AtlasforgeArmoryURL .. CurrentRegion .. '/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
+    local PopupDataFill = {PlayerURL = PlayerURL}
+    StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
+end
+
 local function MenuItemAdd(text, func, value)
     local MenuItem = UIDropDownMenu_CreateInfo()
 
@@ -70,7 +80,8 @@ hooksecurefunc("UnitPopup_ShowMenu", function()
     if (UIDROPDOWNMENU_MENU_LEVEL > 1) then
         return
     end
-    MenuItemAdd("AOTC Armory", AOTCLink, "AOTCArmoryLink")
+    MenuItemAdd("Atlasforge Armory", AtlasforgeLink, "AtlasforgeLink")
     MenuItemAdd("Classic Armory", ClassicArmoryLink, "ClassicArmoryLink")
+    MenuItemAdd("AOTC Armory", AOTCLink, "AOTCArmoryLink")
     MenuItemAdd("Warcraft Logs", WarcraftLogsLink, "WarcraftlogsLink")
 end)
