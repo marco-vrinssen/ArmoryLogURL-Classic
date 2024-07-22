@@ -1,7 +1,7 @@
 ## Interface: 11503
-## Title: Bento Playercheck
+## Title: Bento Player Check
 ## Notes: Adds options to the player context menu to check their armory and logs.
 ## Version: 1.0
 ## Author: MIYANKO
 
-BentoPlayercheck.lua
+BentoPlayerCheck.lua
