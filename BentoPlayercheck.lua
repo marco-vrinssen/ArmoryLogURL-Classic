@@ -1,19 +1,48 @@
-StaticPopupDialogs["PLAYER_LINK_URL"] = {
-    text = "Copy and paste this URL into your browser.",
+local regions = {'us', 'kr', 'eu', 'tw', 'cn'}
+local currentRegion = regions[GetCurrentRegion()]
+
+local function normalizeServerName(serverName)
+    if not serverName or serverName == "" then return end
+
+    local isAU = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and serverName:sub(-3):lower() == "-au"
+    if isAU then serverName = serverName:sub(1, -4) end
+
+    serverName = serverName:gsub("'(%u)", function(c) return c:lower() end):gsub("'", "")
+    serverName = serverName:gsub("%u", "-%1"):gsub("^[-%s]+", ""):gsub("[^%w%s%-]", "")
+    serverName = serverName:gsub("%s", "-"):lower():gsub("%-+", "-")
+    serverName = serverName:gsub("([a-zA-Z])of%-", "%1-of-")
+
+    if isAU then serverName = serverName .. "-au" end
+    return serverName
+end
+
+local function generateLink(linkType, characterName, serverName)
+    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+        print("Error: Cannot determine link type")
+        return
+    end
+
+    local baseUrl = linkType == "logs" and "https://vanilla.warcraftlogs.com/character/" or "https://www.classic-armory.org/character/"
+    local url = baseUrl .. currentRegion .. "/" .. (linkType == "logs" and serverName or "vanilla/" .. serverName) .. "/" .. characterName
+    return url
+end
+
+StaticPopupDialogs["PopupLinkDialog"] = {
+    text = "|cffffcc00Logs & Armory Links\n\nCopy the link below (CTRL + C)|r",
     button1 = "Close",
-    OnAccept = function() end,
     timeout = 0,
     whileDead = true,
     hideOnEscape = true,
     preferredIndex = 3,
     OnShow = function(self, data)
-        self.editBox:SetText(data.PlayerURL)
+        self.editBox:SetText(data.url)
         self.editBox:HighlightText()
         self.editBox:SetFocus()
         self.editBox:SetScript("OnKeyDown", function(_, key)
+            local isMac = IsMacClient()
             if key == "ESCAPE" then
                 self:Hide()
-            elseif IsModifierKeyDown() and key == "C" then
+            elseif (isMac and IsMetaKeyDown() or IsControlKeyDown()) and key == "C" then
                 self:Hide()
             end
         end)
@@ -21,67 +50,42 @@ StaticPopupDialogs["PLAYER_LINK_URL"] = {
     hasEditBox = true
 }
 
-local WarcraftLogsURL = "https://vanilla.warcraftlogs.com/character/"
-local ClassicArmoryURL = "https://classic-armory.org/character/"
-local AOTCArmoryURL = "https://sod.aotc.gg/character/"
-local AtlasforgeArmoryURL = "https://atlasforge.gg/wow-classic/armory/"
-local ServerRegions = {'us', 'kr', 'eu', 'tw', 'cn'}
-
-local function ClassicArmoryLink(self)
-    local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
-    local CurrentRegion = ServerRegions[GetCurrentRegion()]
-    local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
-    local PlayerURL = ClassicArmoryURL .. CurrentRegion .. '/vanilla/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
-    local PopupDataFill = {PlayerURL = PlayerURL}
-    StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
-end
-
-local function WarcraftLogsLink(self)
-    local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
-    local CurrentRegion = ServerRegions[GetCurrentRegion()]
-    local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
-    local PlayerURL = WarcraftLogsURL .. CurrentRegion .. '/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
-    local PopupDataFill = {PlayerURL = PlayerURL}
-    StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
-end
-
-local function AOTCLink(self)
-    local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
-    local CurrentRegion = ServerRegions[GetCurrentRegion()]
-    local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
-    local PlayerURL = AOTCArmoryURL .. CurrentRegion .. '/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
-    local PopupDataFill = {PlayerURL = PlayerURL}
-    StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
-end
-
-local function AtlasforgeLink(self)
-    local RealmSlug = GetRealmName():gsub("[%p%c]", ""):gsub("[%s]", "-"):lower()
-    local CurrentRegion = ServerRegions[GetCurrentRegion()]
-    local DropdownMenu = _G["UIDROPDOWNMENU_INIT_MENU"]
-    local PlayerURL = AtlasforgeArmoryURL .. CurrentRegion .. '/' .. RealmSlug .. '/' .. DropdownMenu.name:lower()
-    local PopupDataFill = {PlayerURL = PlayerURL}
-    StaticPopup_Show("PLAYER_LINK_URL", "", "", PopupDataFill)
-end
-
-local function MenuItemAdd(text, func, value)
-    local MenuItem = UIDropDownMenu_CreateInfo()
-
-    MenuItem.text = text
-    MenuItem.owner = which
-    MenuItem.notCheckable = 1
-    MenuItem.func = func
-    MenuItem.colorCode = "|cffFFD100"
-    MenuItem.value = value
-
-    UIDropDownMenu_AddButton(MenuItem)
-end
-
-hooksecurefunc("UnitPopup_ShowMenu", function()
-    if (UIDROPDOWNMENU_MENU_LEVEL > 1) then
+local function displayPopupLink(linkType, characterName, serverName)
+    if not characterName or characterName == "" then
+        print("Error: Cannot determine character name")
         return
     end
-    MenuItemAdd("Atlasforge Armory", AtlasforgeLink, "AtlasforgeLink")
-    MenuItemAdd("Classic Armory", ClassicArmoryLink, "ClassicArmoryLink")
-    MenuItemAdd("AOTC Armory", AOTCLink, "AOTCArmoryLink")
-    MenuItemAdd("Warcraft Logs", WarcraftLogsLink, "WarcraftlogsLink")
-end)
+
+    local normalizedServerName = normalizeServerName(serverName)
+    if not normalizedServerName or normalizedServerName == "" then
+        print("Error: Cannot determine server name")
+        return
+    end
+
+    local url = generateLink(linkType, characterName:lower(), normalizedServerName)
+    if not url then return end
+
+    StaticPopup_Show("PopupLinkDialog", "", "", {url = url})
+end
+
+if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+    local contextTypes = {
+        "SELF", "TARGET", "PLAYER", "PARTY", "RAID", "RAID_PLAYER", "ENEMY_PLAYER", "FOCUS", 
+        "FRIEND", "GUILD", "GUILD_OFFLINE", "ARENAENEMY", "BN_FRIEND", "CHAT_ROSTER", 
+        "COMMUNITIES_GUILD_MEMBER", "COMMUNITIES_WOW_MEMBER"
+    }
+
+    for _, context in ipairs(contextTypes) do
+        Menu.ModifyMenu("MENU_UNIT_"..context, function(_, description, data)
+            local serverName = data.server or GetNormalizedRealmName()
+
+            description:CreateButton("Logs Link", function()
+                displayPopupLink("logs", data.name, serverName)
+            end)
+
+            description:CreateButton("Armory Link", function()
+                displayPopupLink("armory", data.name, serverName)
+            end)
+        end)
+    end
+end
